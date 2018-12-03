@@ -8,4 +8,4 @@
 #include <vector>
 
 // Logging
-#include "VoxelGame/log/ConsoleLogger.h"
+#include "VoxelGame/logging/ConsoleLogger.h"
