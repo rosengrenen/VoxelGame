@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "VoxelGame/log/ConsoleLogger.h"
+#include "VoxelGame/logging/ConsoleLogger.h"
 
 void ConsoleLogger::SetLogLevel(const LogLevel& level)
 {

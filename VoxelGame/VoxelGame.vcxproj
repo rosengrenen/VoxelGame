@@ -93,7 +93,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\VoxelGame\log\ConsoleLogger.cpp" />
+    <ClCompile Include="src\VoxelGame\logging\ConsoleLogger.cpp" />
     <ClCompile Include="src\VoxelGame\Main.cpp" />
     <ClCompile Include="src\VoxelGame\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -105,7 +105,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\VoxelGame\log\ConsoleLogger.h" />
+    <ClInclude Include="src\VoxelGame\logging\ConsoleLogger.h" />
     <ClInclude Include="src\VoxelGame\pch.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

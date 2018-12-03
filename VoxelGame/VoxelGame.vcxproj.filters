@@ -24,7 +24,7 @@
     <ClCompile Include="src\VoxelGame\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\VoxelGame\log\ConsoleLogger.cpp">
+    <ClCompile Include="src\VoxelGame\logging\ConsoleLogger.cpp">
       <Filter>Source Files\log</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,7 +32,7 @@
     <ClInclude Include="src\VoxelGame\pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VoxelGame\log\ConsoleLogger.h">
+    <ClInclude Include="src\VoxelGame\logging\ConsoleLogger.h">
       <Filter>Source Files\log</Filter>
     </ClInclude>
   </ItemGroup>
