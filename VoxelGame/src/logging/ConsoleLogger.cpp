@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "VoxelGame/logging/ConsoleLogger.h"
+#include "ConsoleLogger.h"
 
 void ConsoleLogger::SetLogLevel(const LogLevel& level)
 {
@@ -32,8 +32,8 @@ void ConsoleLogger::SetLogLevel(const LogLevel& level)
 }
 
 ConsoleLogger::ConsoleLogger() : m_logger(
-    spdlog::stdout_color_mt("ConsoleLogger"))
+                                     spdlog::stdout_color_mt("ConsoleLogger"))
 {
     spdlog::set_pattern("%^[%T] %v%$");
-    SetLogLevel(LogLevel::Off);
+    SetLogLevel(LogLevel::Info);
 }

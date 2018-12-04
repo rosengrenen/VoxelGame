@@ -15,12 +15,11 @@ class ConsoleLogger
 {
 public:
     /* Public methods */
-    static ConsoleLogger& Instance()
-    { 
-        static ConsoleLogger logger;
-        return logger;
-    }
-
+	static ConsoleLogger& Instance()
+	{
+		static ConsoleLogger logger;
+		return logger;
+	}
     template<typename... Args>
     void Info(const Args&... args)
     {
@@ -42,8 +41,8 @@ public:
     void SetLogLevel(const LogLevel& level);
 
 private:
-    /* Private methods */
-    ConsoleLogger();
+	/* Private methods */
+	ConsoleLogger();
 
 private:
     /* Private members */

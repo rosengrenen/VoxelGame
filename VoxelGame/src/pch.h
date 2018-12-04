@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <iostream>
 #include <memory>
 
@@ -7,5 +8,5 @@
 #include <string>
 #include <vector>
 
-// Logging
-#include "VoxelGame/logging/ConsoleLogger.h"
+// Global logging
+#include "logging/ConsoleLogger.h"
