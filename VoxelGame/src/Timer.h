@@ -4,9 +4,9 @@ class Timer
 {
 public:
     /* Public methods */
-	Timer();
-	double Elapsed() const;
-	double Reset();
+    Timer();
+    double Elapsed() const;
+    double Reset();
 
 private:
     /* Private members */

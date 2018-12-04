@@ -2,7 +2,13 @@
 
 #include "ConsoleLogger.h"
 
-void ConsoleLogger::SetLogLevel(const LogLevel& level)
+ConsoleLogger& ConsoleLogger::Instance()
+{
+    static ConsoleLogger logger;
+    return logger;
+}
+
+void ConsoleLogger::SetLogLevel(const LogLevel& level) const
 {
     spdlog::level::level_enum logLevel;
     switch (level)
@@ -32,7 +38,7 @@ void ConsoleLogger::SetLogLevel(const LogLevel& level)
 }
 
 ConsoleLogger::ConsoleLogger() : m_logger(
-                                     spdlog::stdout_color_mt("ConsoleLogger"))
+    spdlog::stdout_color_mt("ConsoleLogger"))
 {
     spdlog::set_pattern("%^[%T] %v%$");
     SetLogLevel(LogLevel::Info);
