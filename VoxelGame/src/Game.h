@@ -5,17 +5,18 @@
 class Game
 {
 public:
-	/* Public methods */
+    /* Public methods */
     Game();
-	void Start();
+    void Start();
+    void Update();
 
 private:
     /* Private methods */
-	void Run();
+    void Run();
 
 private:
-	/* Private members */
+    /* Private members */
     Window m_window;
     double m_frameTime;
-	bool m_running = false;
+    bool m_running = false;
 };

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Game.h"
 
+#include "Shader.h"
 #include "Timer.h"
 
 Game::Game() : m_window(Window(800, 600, "Game"))
@@ -18,17 +19,25 @@ void Game::Start()
     Run();
 }
 
+void Game::Update() {}
+
 void Game::Run()
 {
     m_running = true;
 
     constexpr float vertices[] = {
         -0.8f, -0.8f, 0.0f,
-        0.8, -0.8f, 0.0f,
+        0.8f, -0.8f, 0.0f,
         0.0f, 0.8f, 0.0f,
     };
 
     glEnable(GL_CULL_FACE);
+
+    Shader shader("res/shaders/triangle.vert.glsl", "res/shaders/triangle.frag.glsl");
+
+    unsigned int vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
     unsigned int vbo;
     glGenBuffers(1, &vbo);
@@ -36,6 +45,7 @@ void Game::Run()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
+
 
     Timer timer;
     Timer frameTimer;
@@ -50,8 +60,11 @@ void Game::Run()
         while (unprocessedTime > m_frameTime)
         {
             unprocessedTime -= m_frameTime;
-            m_window.PollEvents();
             render = true;
+
+            m_window.PollEvents();
+
+            Update();
         }
         if (render)
         {
@@ -59,7 +72,8 @@ void Game::Run()
 
             m_window.Clear();
 
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            shader.Use();
+            glBindVertexArray(vao);
             glDrawArrays(GL_TRIANGLES, 0, 3);
 
             m_window.Display();
