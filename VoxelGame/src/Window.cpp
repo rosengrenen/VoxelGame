@@ -15,6 +15,7 @@ Window::Window(int width, int height, const std::string& title)
         throw;
     }
     Activate();
+    SetVerticalSync(false);
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
     {
         LOG_ERROR("glad could not load OpenGL");
@@ -41,4 +42,43 @@ void Window::PollEvents() const
 void Window::Activate() const
 {
     glfwMakeContextCurrent(m_window);
+}
+
+void Window::SetVerticalSync(bool on) const
+{
+    glfwSwapInterval(on ? 1 : 0);
+}
+
+void Window::SetCursorVisible(bool visible) const
+{
+    glfwSetInputMode(m_window, GLFW_CURSOR, visible ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+}
+
+glm::vec2 Window::GetMousePos() const
+{
+    double x, y;
+    glfwGetCursorPos(m_window, &x, &y);
+    return { x, y };
+}
+
+bool Window::KeyDown(int key) const
+{
+    return glfwGetKey(m_window, key) == GLFW_PRESS;
+}
+
+glm::ivec2 Window::GetSize() const
+{
+    int width, height;
+    glfwGetWindowSize(m_window, &width, &height);
+    return { width, height };
+}
+
+int Window::GetWidth() const
+{
+    return GetSize().x;
+}
+
+int Window::GetHeight() const
+{
+    return GetSize().y;
 }

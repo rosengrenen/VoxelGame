@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Shader.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include <glad/glad.h>
 
 Shader::Shader(const std::string& vertexFile, const std::string& fragmentFile)
@@ -22,6 +24,18 @@ void Shader::Use() const
 void Shader::Stop() const
 {
     glUseProgram(0);
+}
+
+void Shader::SetVec3(const std::string& name, float v0, float v1, float v2)
+{
+    Use();
+    glUniform3f(GetUniformLocation(name), v0, v1, v2);
+}
+
+void Shader::SetMat4(const std::string& name, const glm::mat4& matrix)
+{
+    Use();
+    glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
 std::string Shader::ReadFile(const std::string& path)
@@ -74,4 +88,18 @@ unsigned int Shader::LinkProgram(unsigned vertexShader, unsigned fragmentShader)
     }
 
     return program;
+}
+
+int Shader::GetUniformLocation(const std::string& name)
+{
+    if (m_uniformLocations.find(name) == m_uniformLocations.end())
+    {
+        int location = glGetUniformLocation(m_id, name.c_str());
+        m_uniformLocations[name] = location;
+        if (location == -1)
+        {
+            LOG_ERROR("Uniform '{}' not found", location);
+        }
+    }
+    return m_uniformLocations[name];
 }

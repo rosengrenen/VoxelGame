@@ -4,8 +4,10 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <thread>
 
 // Data structures
+#include <map>
 #include <string>
 #include <vector>
 
