@@ -5,12 +5,13 @@
 #include <glm/mat4x4.hpp>
 
 #include "Camera.h"
+#include "Chunk.h"
 #include "Shader.h"
 #include "Timer.h"
 
 Game::Game() : m_window(Window(800, 600, "Game"))
 {
-    m_frameTime = 1.0 / 60;
+    m_frameTime = 1.0 / 10000;
 }
 
 void Game::Start()
@@ -164,9 +165,7 @@ void Game::Run()
     constexpr double updateTime = 1.0 / 100.0;
     double fov = 45.0;
     double nearPlane = 0.1;
-    double farPlane = 100.0;
-
-    LOG_INFO("{} * 200 = {}", updateTime, updateTime * 100.0);
+    double farPlane = 1000.0;
 
     constexpr float vertices[] = {
         -0.8f, -0.8f, 0.0f,
@@ -187,6 +186,7 @@ void Game::Run()
     shader.SetMat4("projection", proj);
 
     glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
 
     unsigned int vao;
     glGenVertexArrays(1, &vao);
@@ -202,10 +202,6 @@ void Game::Run()
     float* lines = GenerateCameraMesh(camera, fov, static_cast<double>(m_window.GetWidth()) / m_window.GetHeight(),
                                       nearPlane, farPlane);
 
-    for (int i = 0; i < 72; i += 3)
-    {
-        std::cout << "V(" << lines[i] << ", " << lines[i + 1] << ", " << lines[i + 2] << ")" << std::endl;
-    }
     unsigned int lVao;
     glGenVertexArrays(1, &lVao);
     glBindVertexArray(lVao);
@@ -217,6 +213,12 @@ void Game::Run()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
+    Shader chunkShader("res/shaders/chunk.vert.glsl", "res/shaders/chunk.frag.glsl");
+    chunkShader.SetMat4("projection", proj);
+
+    Chunk chunk;
+    chunk.Setup();
+
     Timer camSwapTimer;
 
     Timer timer;
@@ -224,7 +226,6 @@ void Game::Run()
     double unprocessedUpdateTime = 0;
     double unprocessedRenderTime = 0;
     int frames = 0;
-    int updates = 0;
 
     glm::vec2 mousePos = m_window.GetMousePos();
 
@@ -240,7 +241,6 @@ void Game::Run()
         {
             updatesThisLoop++;
             unprocessedUpdateTime -= updateTime;
-            updates++;
 
             if (updatesThisLoop == 1)
             {
@@ -347,6 +347,10 @@ void Game::Run()
                                glm::perspective(glm::radians(fov),
                                                 static_cast<double>(m_window.GetWidth()) / m_window.GetHeight(),
                                                 nearPlane, farPlane));
+                chunkShader.SetMat4("projection",
+                    glm::perspective(glm::radians(fov),
+                        static_cast<double>(m_window.GetWidth()) / m_window.GetHeight(),
+                        nearPlane, farPlane));
             }
 
             if (m_window.KeyDown(GLFW_KEY_1) && camSwapTimer.Elapsed() > 0.1)
@@ -373,10 +377,8 @@ void Game::Run()
         if (frameTimer.Elapsed() > 1.0)
         {
             double time = frameTimer.Reset();
-            LOG_INFO("FPS: {} && UPDATES: {}", static_cast<double>(frames) / time, static_cast<double>(updates) / time);
-            LOG_INFO("fov:{} near:{} far:{}", fov, nearPlane, farPlane);
+            LOG_INFO("FPS: {}", static_cast<double>(frames) / time);
             frames = 0;
-            updates = 0;
         }
         if (unprocessedRenderTime > m_frameTime)
         {
@@ -384,11 +386,15 @@ void Game::Run()
 
             m_window.Clear();
 
+            chunkShader.SetMat4("view", camera.ViewMatrix());
+
             shader.Use();
             shader.SetMat4("view", camera.ViewMatrix());
             shader.SetVec3("color", 1.0f, 0.0f, 0.0f);
             glBindVertexArray(vao);
             glDrawArrays(GL_TRIANGLES, 0, 3);
+
+            chunk.Render(chunkShader);
 
             shader.SetVec3("color", 0.0f, 1.0f, 0.0f);
             glBindVertexArray(lVao);
