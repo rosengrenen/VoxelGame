@@ -5,53 +5,9 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "FastNoiseSIMD/FastNoiseSIMD.h"
+#include "FastNoise/FastNoise.h"
+
 #include "Timer.h"
-
-static constexpr float cubeVertices[] = {
-    // positions         // normals         // texture coords
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, // 0.0f, 0.0f,
-    -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, // 0.0f, 1.0f,
-    0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, // 1.0f, 1.0f,
-    0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, // 1.0f, 1.0f,
-    0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, // 1.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, // 0.0f, 0.0f,
-
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, // 0.0f, 0.0f,
-    0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, // 1.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, // 1.0f, 1.0f,
-    0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, // 1.0f, 1.0f,
-    -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, // 0.0f, 1.0f,
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, // 0.0f, 0.0f,
-
-    -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, // 1.0f, 0.0f,
-    -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f, // 1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, // 0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, // 0.0f, 1.0f,
-    -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, // 0.0f, 0.0f,
-    -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, // 1.0f, 0.0f,
-
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, // 1.0f, 0.0f,
-    0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, // 0.0f, 0.0f,
-    0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // 0.0f, 1.0f,
-    0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // 0.0f, 1.0f,
-    0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // 1.0f, 1.0f,
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, // 1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, // 0.0f, 1.0f,
-    0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, // 1.0f, 1.0f,
-    0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, // 1.0f, 0.0f,
-    0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, // 1.0f, 0.0f,
-    -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, // 0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, // 0.0f, 1.0f,
-
-    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // 0.0f, 1.0f,
-    -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, // 0.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, // 1.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, // 1.0f, 0.0f,
-    0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // 1.0f, 1.0f,
-    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // 0.0f, 1.0f
-};
 
 Chunk::Chunk()
 {
@@ -63,49 +19,86 @@ void Chunk::Setup()
 {
     LOG_INFO("Chunk size: {}", CHUNK_SIZE);
     Timer masterTimer;
-    FastNoiseSIMD* noiseGen = FastNoiseSIMD::NewFastNoiseSIMD();
 
-    noiseGen->SetFrequency(0.1);
-    float* noise = noiseGen->GetPerlinSet(0, 0, 0, CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
-    int index = 0;
+    FastNoise noise(time(0));
+    noise.SetFrequency(0.03);
+
+    float noiseMap[CHUNK_SIZE_SQUARED];
+
+    for (int x = 0; x < CHUNK_SIZE; ++x)
+    {
+        for (int z = 0; z < CHUNK_SIZE; ++z)
+        {
+            noiseMap[x * CHUNK_SIZE + z] = noise.GetValueFractal(x, z);
+        }
+    }
 
     m_blocks.resize(CHUNK_SIZE_CUBED);
 
     for (int x = 0; x < CHUNK_SIZE; ++x)
     {
-        for (int y = 0; y < CHUNK_SIZE; ++y)
+        for (int z = 0; z < CHUNK_SIZE; ++z)
         {
-            for (int z = 0; z < CHUNK_SIZE; ++z)
+            for (int y = 0; y < CHUNK_SIZE; ++y)
             {
-                if (noise[index] > 0.0f)
+                if (((noiseMap[x * CHUNK_SIZE + z] + 1) / 2) > static_cast<double>(y) / 40)
                 {
                     unsigned char red = 0;
                     unsigned char green = 0;
                     unsigned char blue = 0;
 
-                    double val = static_cast<double>(y) / CHUNK_SIZE;
-                    if (val < 0.33)
+                    double val = static_cast<double>(y) / 40;
+                    if (val < 0.3)
                     {
-                        red = 119;
-                        green = 244;
-                        blue = 66;
+                        red = 52;
+                        green = 99;
+                        blue = 194;
                     }
-                    else if (val < 0.66)
+                    else if (val < 0.4)
                     {
-                        red = 84;
-                        green = 107;
-                        blue = 107;
+                        red = 91;
+                        green = 137;
+                        blue = 232;
+                    }
+                    else if (val < 0.45)
+                    {
+                        red = 211;
+                        green = 208;
+                        blue = 125;
+                    }
+                    else if (val < 0.55)
+                    {
+                        red = 85;
+                        green = 151;
+                        blue = 23;
+                    }
+                    else if (val < 0.6)
+                    {
+                        red = 61;
+                        green = 106;
+                        blue = 25;
+                    }
+                    else if (val < 0.7)
+                    {
+                        red = 92;
+                        green = 69;
+                        blue = 62;
+                    }
+                    else if (val < 0.9)
+                    {
+                        red = 76;
+                        green = 60;
+                        blue = 555;
                     }
                     else
                     {
-                        red = 206;
-                        green = 239;
-                        blue = 239;
+                        red = 255;
+                        green = 255;
+                        blue = 255;
                     }
 
                     m_blocks.at(x * CHUNK_SIZE_SQUARED + y * CHUNK_SIZE + z) = Block(red, green, blue, 0);
                 }
-                index++;
             }
         }
     }
@@ -114,7 +107,8 @@ void Chunk::Setup()
     CreateMesh();
 }
 
-void AddVertex(std::vector<float>& data, int x, int y, int z, int nx, int ny, int nz, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+void AddVertex(std::vector<float>& data, int x, int y, int z, int nx, int ny, int nz, unsigned char r, unsigned char g,
+               unsigned char b, unsigned char a)
 {
     data.push_back(x);
     data.push_back(y);
@@ -143,15 +137,21 @@ void Chunk::CreateMesh()
                 Block& block = m_blocks[x * CHUNK_SIZE_SQUARED + y * CHUNK_SIZE + z];
                 if (block.IsActive())
                 {
-                    bool xPlus = x == CHUNK_SIZE - 1 || (x < CHUNK_SIZE - 1 && !m_blocks[(x + 1) * CHUNK_SIZE_SQUARED + y * CHUNK_SIZE + z].
-                            IsActive());
-                    bool xMinus = x == 0 || (x != 0 && !m_blocks[(x - 1) * CHUNK_SIZE_SQUARED + y * CHUNK_SIZE + z].IsActive());
-                    bool yPlus = y == CHUNK_SIZE - 1 || (y < CHUNK_SIZE - 1 && !m_blocks[x * CHUNK_SIZE_SQUARED + (y + 1) * CHUNK_SIZE + z].
-                            IsActive());
-                    bool yMinus = y == 0 || (y != 0 && !m_blocks[x * CHUNK_SIZE_SQUARED + (y - 1) * CHUNK_SIZE + z].IsActive());
-                    bool zPlus = z == CHUNK_SIZE - 1 || (z < CHUNK_SIZE - 1 && !m_blocks[x * CHUNK_SIZE_SQUARED + y * CHUNK_SIZE + z + 1].
-                            IsActive());
-                    bool zMinus = z == 0 || (z != 0 && !m_blocks[x * CHUNK_SIZE_SQUARED + y * CHUNK_SIZE + z - 1].IsActive());
+                    bool xPlus = x == CHUNK_SIZE - 1 || (x < CHUNK_SIZE - 1 && !m_blocks[(x + 1) * CHUNK_SIZE_SQUARED +
+                            y * CHUNK_SIZE + z].
+                        IsActive());
+                    bool xMinus = x == 0 || (x != 0 && !m_blocks[(x - 1) * CHUNK_SIZE_SQUARED + y * CHUNK_SIZE + z].
+                        IsActive());
+                    bool yPlus = y == CHUNK_SIZE - 1 || (y < CHUNK_SIZE - 1 && !m_blocks[x * CHUNK_SIZE_SQUARED + (y + 1
+                        ) * CHUNK_SIZE + z].
+                        IsActive());
+                    bool yMinus = y == 0 || (y != 0 && !m_blocks[x * CHUNK_SIZE_SQUARED + (y - 1) * CHUNK_SIZE + z].
+                        IsActive());
+                    bool zPlus = z == CHUNK_SIZE - 1 || (z < CHUNK_SIZE - 1 && !m_blocks[x * CHUNK_SIZE_SQUARED + y *
+                            CHUNK_SIZE + z + 1].
+                        IsActive());
+                    bool zMinus = z == 0 || (z != 0 && !m_blocks[x * CHUNK_SIZE_SQUARED + y * CHUNK_SIZE + z - 1].
+                        IsActive());
                     if (xPlus)
                     {
                         count += 6;
@@ -316,80 +316,80 @@ void Chunk::CreateMesh()
                     {
                         count += 6;
                         AddVertex(data,
-                            0.5f + x, 0.5f + y, 0.5f + z,
-                            0.0f, 0.0f, 1.0f,
-                            block.GetRed(), block.GetGreen(),
-                            block.GetBlue(), block.GetAlpha()
+                                  0.5f + x, 0.5f + y, 0.5f + z,
+                                  0.0f, 0.0f, 1.0f,
+                                  block.GetRed(), block.GetGreen(),
+                                  block.GetBlue(), block.GetAlpha()
                         );
                         AddVertex(data,
-                            -0.5f + x, 0.5f + y, 0.5f + z,
-                            0.0f, 0.0f, 1.0f,
-                            block.GetRed(), block.GetGreen(),
-                            block.GetBlue(), block.GetAlpha()
+                                  -0.5f + x, 0.5f + y, 0.5f + z,
+                                  0.0f, 0.0f, 1.0f,
+                                  block.GetRed(), block.GetGreen(),
+                                  block.GetBlue(), block.GetAlpha()
                         );
                         AddVertex(data,
-                            -0.5f + x, -0.5f + y, 0.5f + z,
-                            0.0f, 0.0f, 1.0f,
-                            block.GetRed(), block.GetGreen(),
-                            block.GetBlue(), block.GetAlpha()
+                                  -0.5f + x, -0.5f + y, 0.5f + z,
+                                  0.0f, 0.0f, 1.0f,
+                                  block.GetRed(), block.GetGreen(),
+                                  block.GetBlue(), block.GetAlpha()
                         );
                         AddVertex(data,
-                            -0.5f + x, -0.5f + y, 0.5f + z,
-                            0.0f, 0.0f, 1.0f,
-                            block.GetRed(), block.GetGreen(),
-                            block.GetBlue(), block.GetAlpha()
+                                  -0.5f + x, -0.5f + y, 0.5f + z,
+                                  0.0f, 0.0f, 1.0f,
+                                  block.GetRed(), block.GetGreen(),
+                                  block.GetBlue(), block.GetAlpha()
                         );
                         AddVertex(data,
-                            0.5f + x, -0.5f + y, 0.5f + z,
-                            0.0f, 0.0f, 1.0f,
-                            block.GetRed(), block.GetGreen(),
-                            block.GetBlue(), block.GetAlpha()
+                                  0.5f + x, -0.5f + y, 0.5f + z,
+                                  0.0f, 0.0f, 1.0f,
+                                  block.GetRed(), block.GetGreen(),
+                                  block.GetBlue(), block.GetAlpha()
                         );
                         AddVertex(data,
-                            0.5f + x, 0.5f + y, 0.5f + z,
-                            0.0f, 0.0f, 1.0f,
-                            block.GetRed(), block.GetGreen(),
-                            block.GetBlue(), block.GetAlpha()
+                                  0.5f + x, 0.5f + y, 0.5f + z,
+                                  0.0f, 0.0f, 1.0f,
+                                  block.GetRed(), block.GetGreen(),
+                                  block.GetBlue(), block.GetAlpha()
                         );
                     }
                     if (zMinus)
                     {
                         count += 6;
                         AddVertex(data,
-                            0.5f + x, 0.5f + y, -0.5f + z,
-                            0.0f, 0.0f, -1.0f,
-                            block.GetRed(), block.GetGreen(),
-                            block.GetBlue(), block.GetAlpha()
+                                  0.5f + x, 0.5f + y, -0.5f + z,
+                                  0.0f, 0.0f, -1.0f,
+                                  block.GetRed(), block.GetGreen(),
+                                  block.GetBlue(), block.GetAlpha()
                         );
                         AddVertex(data,
-                            0.5f + x, -0.5f + y, -0.5f + z,
-                            0.0f, 0.0f, -1.0f,
-                            block.GetRed(), block.GetGreen(),
-                            block.GetBlue(), block.GetAlpha()
+                                  0.5f + x, -0.5f + y, -0.5f + z,
+                                  0.0f, 0.0f, -1.0f,
+                                  block.GetRed(), block.GetGreen(),
+                                  block.GetBlue(), block.GetAlpha()
                         );
                         AddVertex(data,
-                            -0.5f + x, -0.5f + y, -0.5f + z,
-                            0.0f, 0.0f, -1.0f,
-                            block.GetRed(), block.GetGreen(),
-                            block.GetBlue(), block.GetAlpha()
+                                  -0.5f + x, -0.5f + y, -0.5f + z,
+                                  0.0f, 0.0f, -1.0f,
+                                  block.GetRed(), block.GetGreen(),
+                                  block.GetBlue(), block.GetAlpha()
                         );
                         AddVertex(data,
-                            -0.5f + x, -0.5f + y, -0.5f + z,
-                            0.0f, 0.0f, -1.0f,
-                            block.GetRed(), block.GetGreen(),
-                            block.GetBlue(), block.GetAlpha()
+                                  -0.5f + x, -0.5f + y, -0.5f + z,
+                                  0.0f, 0.0f, -1.0f,
+                                  block.GetRed(), block.GetGreen(),
+                                  block.GetBlue(), block.GetAlpha()
                         );
                         AddVertex(data,
-                            -0.5f + x, 0.5f + y, -0.5f + z,
-                            0.0f, 0.0f, -1.0f,
-                            block.GetRed(), block.GetGreen(),
-                            block.GetBlue(), block.GetAlpha()
+                                  -0.5f + x, 0.5f + y, -0.5f + z,
+                                  0.0f, 0.0f, -1.0f,
+                                  block.GetRed(), block.GetGreen(),
+                                  block.GetBlue(), block.GetAlpha()
                         );
                         AddVertex(data,
-                            0.5f + x, 0.5f + y, -0.5f + z,
-                            0.0f, 0.0f, -1.0f,
-                            block.GetRed(), block.GetGreen(),
-                            block.GetBlue(), block.GetAlpha()
+                                  0.5f + x, 0.5f + y, -0.5f + z,
+                                  0.0f, 0.0f, -1.0f,
+                                  block.GetRed(), block.GetGreen(),
+                                  block.GetBlue(), block.GetAlpha()
                         );
                     }
                 }

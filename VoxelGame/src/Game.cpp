@@ -11,7 +11,7 @@
 
 Game::Game() : m_window(Window(800, 600, "Game"))
 {
-    m_frameTime = 1.0 / 10000;
+    m_frameTime = 1.0 / 60;
 }
 
 void Game::Start()
@@ -398,7 +398,7 @@ void Game::Run()
 
             shader.SetVec3("color", 0.0f, 1.0f, 0.0f);
             glBindVertexArray(lVao);
-            glDrawArrays(GL_LINES, 0, 72);
+            //glDrawArrays(GL_LINES, 0, 72);
 
             m_window.Display();
             unprocessedRenderTime -= m_frameTime;

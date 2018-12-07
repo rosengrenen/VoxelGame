@@ -57,6 +57,6 @@ private:
 
     double m_changed = true;
 
-    static constexpr double MOVEMENT_SPEED = 3;
+    static constexpr double MOVEMENT_SPEED = 10;
     static constexpr double MOUSE_SENSITIVITY = 0.08;
 };
