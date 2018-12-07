@@ -2,14 +2,13 @@
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
-layout (location = 2) in mat4 model;
-layout (location = 6) in vec4 color;
+layout (location = 2) in vec4 color;
 
 out vec4 outColor;
 out vec3 outNormal;
 out vec3 outFragPos;
 
-uniform mat4 view, projection;
+uniform mat4 model, view, projection;
 
 void main()
 {

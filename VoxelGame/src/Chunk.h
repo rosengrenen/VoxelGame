@@ -11,7 +11,7 @@ public:
 
     void Setup();
     void CreateMesh();
-    void Render(const Shader& shader);
+    void Render(Shader& shader);
 
 public:
     /* Public members */
