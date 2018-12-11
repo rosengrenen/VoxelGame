@@ -8,10 +8,11 @@
 #include "Chunk.h"
 #include "Shader.h"
 #include "Timer.h"
+#include "ChunkManager.h"
 
 Game::Game() : m_window(Window(800, 600, "Game"))
 {
-    m_frameTime = 1.0 / 60;
+    m_frameTime = 1.0 / 600;
 }
 
 void Game::Start()
@@ -162,7 +163,7 @@ void Game::Run()
 
     m_window.SetCursorVisible(false);
 
-    constexpr double updateTime = 1.0 / 100.0;
+    constexpr double updateTime = 1.0 / 60.0;
     double fov = 45.0;
     double nearPlane = 0.1;
     double farPlane = 1000.0;
@@ -216,10 +217,9 @@ void Game::Run()
     Shader chunkShader("res/shaders/chunk.vert.glsl", "res/shaders/chunk.frag.glsl");
     chunkShader.SetMat4("projection", proj);
 
-    Chunk chunk;
-    chunk.Setup();
-
     Timer camSwapTimer;
+
+    ChunkManager chunkManager(camera);
 
     Timer timer;
     Timer frameTimer;
@@ -368,6 +368,8 @@ void Game::Run()
                 glBufferData(GL_ARRAY_BUFFER, 72 * sizeof(float), lines, GL_DYNAMIC_DRAW);
             }
 
+            chunkManager.Update();
+
             Update();
         }
         if (updatesThisLoop == 0)
@@ -387,6 +389,7 @@ void Game::Run()
             m_window.Clear();
 
             chunkShader.SetMat4("view", camera.ViewMatrix());
+            chunkManager.Render(chunkShader);
 
             shader.Use();
             shader.SetMat4("view", camera.ViewMatrix());
@@ -394,14 +397,12 @@ void Game::Run()
             glBindVertexArray(vao);
             glDrawArrays(GL_TRIANGLES, 0, 3);
 
-            chunk.Render(chunkShader);
-
             shader.SetVec3("color", 0.0f, 1.0f, 0.0f);
             glBindVertexArray(lVao);
             //glDrawArrays(GL_LINES, 0, 72);
 
             m_window.Display();
-            unprocessedRenderTime -= m_frameTime;
+            unprocessedRenderTime = 0; // -= m_frameTime;
         }
         else
         {

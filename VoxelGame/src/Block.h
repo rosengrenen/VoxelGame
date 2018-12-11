@@ -18,6 +18,7 @@ public:
     void SetAlpha(unsigned char alpha);
 
     bool IsActive() const;
+
 private:
     /* Private members */
     unsigned char m_red;

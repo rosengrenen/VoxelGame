@@ -77,6 +77,21 @@ void Camera::MouseMovement(int dx, int dy)
     }
 }
 
+//bool Camera::SphereInFrustum(const glm::vec3& center, float radius)
+//{
+//    float distance;
+//    int result = INSIDE;
+//
+//    for (int i = 0; i < 6; i++) {
+//        distance = pl[i].distance(p);
+//        if (distance < -radius)
+//            return OUTSIDE;
+//        else if (distance < radius)
+//            result = INTERSECT;
+//    }
+//    return(result);
+//}
+
 void Camera::UpdateViewMatrix()
 {
     if (!m_changed)

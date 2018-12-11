@@ -38,6 +38,8 @@ public:
         return m_position;
     }
 
+    bool SphereInFrustum(const glm::vec3& center, float radius);
+
 private:
     /* Private methods */
     void UpdateViewMatrix();
